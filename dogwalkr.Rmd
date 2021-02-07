@@ -5,6 +5,12 @@ date: "07/02/2021"
 output: html_document
 ---
 
+Boundary data from:
+
+Source: Office for National Statistics licensed under the Open Government Licence v.3.0
+
+Contains OS data © Crown copyright and database right [2017]
+
 ```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(sf)
