@@ -41,11 +41,13 @@ ca %>%
   mutate(stroke = 0) %>% 
   bind_rows(ca_buffer) %>% 
   filter(LAD17NM %in% c("Scottish Borders", "City of Edinburgh")) %>%
-  st_transform(ca1, crs = "+proj=latlon +datum=WGS84") %>%
+  mutate(fillColor = if_else(LAD17NM == "Scottish Borders",
+                              "red", "blue")) %>% 
+  st_transform(crs = "+proj=latlon +datum=WGS84") %>%
   leaflet() %>%
   addTiles() %>%
-  addPolygons(fillColor = "blue", stroke = ~stroke,
-              weight = 2, fillOpacity = 0.1) %>%
+  addPolygons(fillColor = ~fillColor, stroke = ~stroke,
+              weight = 2, fillOpacity = 0.1, color = "grey") %>%
   addMeasure() %>%
   addScaleBar()
 ```
