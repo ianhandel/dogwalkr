@@ -1,24 +1,18 @@
 ---
 title: "dogwalkr"
-author: "IH"
-date: "07/02/2021"
-output: html_document
+output:
+  html_document:
+    code_folding: hide
 ---
 
-Boundary data from:
+Shaded areas might be 5 mile buffers on The Scottish Borders and The City of Edinburgh. Don't rely on that though.
 
-Source: Office for National Statistics licensed under the Open Government Licence v.3.0
-
-Contains OS data © Crown copyright and database right [2017]
-
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.width=10}
 library(tidyverse)
 library(sf)
 library(leaflet)
 library(here)
-```
 
-```{r}
 meters_in_mile <- 1609
 
 ca <- read_sf(here(
@@ -27,12 +21,7 @@ ca <- read_sf(here(
 ))
 
 # st_crs(ca)
-```
 
-
-
-
-```{r, fig.width=10}
 ca_buffer <- ca %>%
   st_buffer(dist = 5 * meters_in_mile) %>% 
   mutate(stroke = 0.2)
@@ -51,3 +40,9 @@ ca %>%
   addMeasure() %>%
   addScaleBar()
 ```
+
+Copyright notice for boundary data:
+
+Source: Office for National Statistics licensed under the Open Government Licence v.3.0
+
+Contains OS data © Crown copyright and database right [2017]
