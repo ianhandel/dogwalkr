@@ -27,13 +27,19 @@ ca <- read_sf(here(
 
 
 ```{r, fig.width=10}
-ca %>%
-  st_buffer(dist = 5 * meters_in_mile) %>%
+ca_buffer <- ca %>%
+  st_buffer(dist = 5 * meters_in_mile) %>% 
+  mutate(stroke = 0.2)
+
+ca %>% 
+  mutate(stroke = 0) %>% 
+  bind_rows(ca_buffer) %>% 
   filter(LAD17NM %in% c("Scottish Borders", "City of Edinburgh")) %>%
   st_transform(ca1, crs = "+proj=latlon +datum=WGS84") %>%
   leaflet() %>%
   addTiles() %>%
-  addPolygons() %>%
+  addPolygons(fillColor = "blue", stroke = ~stroke,
+              weight = 2, fillOpacity = 0.1) %>%
   addMeasure() %>%
   addScaleBar()
 ```
