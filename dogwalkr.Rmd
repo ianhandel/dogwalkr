@@ -5,9 +5,9 @@ output:
     code_folding: hide
 ---
 
-Shaded areas might be 5 mile buffers on The Scottish Borders and The City of Edinburgh. Don't rely on that though.
+Shaded areas might be 5 mile buffers on the selected council areas. Don't rely on that though.
 
-```{r, message=FALSE, warning=FALSE, fig.width=10}
+```{r, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
 library(tidyverse)
 library(sf)
 library(leaflet)
@@ -15,30 +15,75 @@ library(here)
 
 meters_in_mile <- 1609
 
+# load council areas
 ca <- read_sf(here(
   "Local_Authority_Districts__December_2017__Boundaries_GB_BUC-shp",
   "Local_Authority_Districts__December_2017__Boundaries_GB_BUC.shp"
 ))
 
-# st_crs(ca)
+# just the Scottish ones
+scot <- c("Aberdeen City", "Aberdeenshire",
+"Angus", "Argyll and Bute", "City of Edinburgh", "Clackmannanshire",
+"Dumfries and Galloway", "Dundee City", 
+"East Ayrshire", "East Dunbartonshire", "East Lothian", "East Renfrewshire", 
+"Falkirk", "Fife", "Glasgow City",
+"Highland", "Inverclyde", "Midlothian",  
+"Moray", "Na h-Eileanan Siar", "North Ayrshire", 
+"North Lanarkshire", "Orkney Islands",
+"Perth and Kinross", "Renfrewshire", "Scottish Borders", 
+"Shetland Islands",  "South Ayrshire", 
+"South Lanarkshire", "Stirling", 
+"West Dunbartonshire", "West Lothian")
 
+# apply the filter!
+ca <- ca %>% 
+  filter(LAD17NM %in% scot)
+
+# colours for other areas
+pal <- RColorBrewer::brewer.pal(n = 6, name = "Set1")
+
+# Buffer round all areas
 ca_buffer <- ca %>%
+  mutate(type = "buffer") %>% 
   st_buffer(dist = 5 * meters_in_mile) %>% 
   mutate(stroke = 0.2)
 
+# join area to buffers with different stroke width
 ca %>% 
-  mutate(stroke = 0) %>% 
+  mutate(type = "base") %>% 
+  mutate(stroke = 0.1) %>% 
   bind_rows(ca_buffer) %>% 
-  filter(LAD17NM %in% c("Scottish Borders", "City of Edinburgh")) %>%
-  mutate(fillColor = if_else(LAD17NM == "Scottish Borders",
-                              "red", "blue")) %>% 
+  
+  # set colours
+  
+  mutate(fillColor = case_when(LAD17NM == "Scottish Borders" ~ "red",
+                               LAD17NM == "City of Edinburgh" ~ "blue",
+                               TRUE ~ sample(pal, 64, TRUE))) %>%
+  
+  # project
+  
   st_transform(crs = "+proj=latlon +datum=WGS84") %>%
+  
+  # render map
+  
   leaflet() %>%
   addTiles() %>%
   addPolygons(fillColor = ~fillColor, stroke = ~stroke,
-              weight = 2, fillOpacity = 0.1, color = "grey") %>%
+              weight = 2, fillOpacity = 0.1, color = "grey",
+              group = ~LAD17NM) %>%
+  
+  # controls
+  
   addMeasure() %>%
-  addScaleBar()
+  addScaleBar() %>% 
+  addLayersControl(overlayGroups = c(scot),
+                   options = layersControlOptions(collapsed = FALSE)) %>% 
+  hideGroup(scot) %>% 
+  showGroup(c("Scottish Borders", "City of Edinburgh")) %>% 
+  
+  # centre near borders
+  
+  setView(lng = -3, lat = 55.7, zoom = 9)
 ```
 
 Copyright notice for boundary data:
