@@ -13,6 +13,8 @@ library(sf)
 library(leaflet)
 library(here)
 
+set.seed(2)
+
 meters_in_mile <- 1609
 
 # load council areas
@@ -40,7 +42,7 @@ ca <- ca %>%
   filter(LAD17NM %in% scot)
 
 # colours for other areas
-pal <- RColorBrewer::brewer.pal(n = 6, name = "Set1")
+pal <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#CC79A7", "#999999")
 
 # Buffer round all areas
 ca_buffer <- ca %>%
@@ -56,8 +58,8 @@ ca %>%
   
   # set colours
   
-  mutate(fillColor = case_when(LAD17NM == "Scottish Borders" ~ "red",
-                               LAD17NM == "City of Edinburgh" ~ "blue",
+  mutate(fillColor = case_when(LAD17NM == "Scottish Borders" ~ "#D55E00",
+                               LAD17NM == "City of Edinburgh" ~ "#0072B2",
                                TRUE ~ sample(pal, 64, TRUE))) %>%
   
   # project
